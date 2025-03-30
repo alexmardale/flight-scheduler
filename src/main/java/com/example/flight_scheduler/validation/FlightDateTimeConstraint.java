@@ -6,7 +6,7 @@ import jakarta.validation.Payload;
 import java.lang.annotation.*;
 
 @Documented
-@Constraint(validatedBy = FlightDateTimeValidator.class)
+@Constraint(validatedBy = {FlightDateTimeValidator.class, FlightDtoDateTimeValidator.class})
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface FlightDateTimeConstraint {
