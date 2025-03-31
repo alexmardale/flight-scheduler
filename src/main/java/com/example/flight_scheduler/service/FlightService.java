@@ -2,6 +2,7 @@ package com.example.flight_scheduler.service;
 
 import com.example.flight_scheduler.dto.CreateFlightDto;
 import com.example.flight_scheduler.dto.GetFlightDto;
+import com.example.flight_scheduler.exception.FlightNotFoundException;
 import com.example.flight_scheduler.mapper.FlightMapper;
 import com.example.flight_scheduler.model.Flight;
 import com.example.flight_scheduler.repository.FlightRepository;
@@ -10,6 +11,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
+
+import java.util.Optional;
 
 @Service
 @Validated
@@ -36,5 +39,24 @@ public class FlightService {
         log.info("Saved flight: {}", flight);
 
         return flightMapper.toGetFlightDto(flight);
+    }
+
+    /**
+     * Retrieve the flight specified by id
+     *
+     * @param id the id of the flight to retrieve
+     * @return the flight specified by id
+     * @throws FlightNotFoundException if no flight is found by the specified id
+     */
+    public GetFlightDto getFlight(Long id) throws FlightNotFoundException {
+        Optional<Flight> flightOptional = flightRepository.findById(id);
+
+        if (flightOptional.isEmpty()) {
+            log.info("Flight not found for id {}", id);
+            throw new FlightNotFoundException();
+        } else {
+            log.info("Flight found for id {}", id);
+            return flightMapper.toGetFlightDto(flightOptional.get());
+        }
     }
 }
