@@ -2,6 +2,7 @@ package com.example.flight_scheduler.utils;
 
 import com.example.flight_scheduler.dto.CreateFlightDto;
 import com.example.flight_scheduler.dto.GetFlightDto;
+import com.example.flight_scheduler.dto.SearchFlightDto;
 import com.example.flight_scheduler.model.Flight;
 import com.example.flight_scheduler.model.FlightStatus;
 
@@ -48,6 +49,26 @@ public class FlightUtils {
         flight.setDestination(DESTINATION);
         flight.setDepartureTime(DEPARTURE_TIME);
         flight.setArrivalTime(ARRIVAL_TIME);
+        flight.setFlightStatus(FlightStatus.SCHEDULED);
+
+        return flight;
+    }
+
+    public static SearchFlightDto buildSearchFlightDto() {
+        SearchFlightDto searchFlightDto = new SearchFlightDto();
+        searchFlightDto.setFlightNumber(FLIGHT_NUMBER);
+        searchFlightDto.setDeparture(DEPARTURE);
+        searchFlightDto.setDestination(DESTINATION);
+        searchFlightDto.setFlightStatus(FlightStatus.SCHEDULED);
+
+        return searchFlightDto;
+    }
+
+    public static Flight buildSearchFlightExample() {
+        Flight flight = new Flight();
+        flight.setFlightNumber(FLIGHT_NUMBER);
+        flight.setDeparture(DEPARTURE);
+        flight.setDestination(DESTINATION);
         flight.setFlightStatus(FlightStatus.SCHEDULED);
 
         return flight;

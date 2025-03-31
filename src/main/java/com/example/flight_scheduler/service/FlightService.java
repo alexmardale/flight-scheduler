@@ -2,6 +2,7 @@ package com.example.flight_scheduler.service;
 
 import com.example.flight_scheduler.dto.CreateFlightDto;
 import com.example.flight_scheduler.dto.GetFlightDto;
+import com.example.flight_scheduler.dto.SearchFlightDto;
 import com.example.flight_scheduler.exception.FlightNotFoundException;
 import com.example.flight_scheduler.mapper.FlightMapper;
 import com.example.flight_scheduler.model.Flight;
@@ -10,6 +11,7 @@ import com.example.flight_scheduler.repository.FlightRepository;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
@@ -92,5 +94,20 @@ public class FlightService {
             log.info("Flight with id {} has been cancelled", id);
             return flightMapper.toGetFlightDto(flight);
         }
+    }
+
+    /**
+     * Retrieve flights which match the provided flight
+     *
+     * @param searchFlightDto the flight by which to search
+     * @return a list of flights matching the provided flight
+     */
+    public List<GetFlightDto> searchFlights(SearchFlightDto searchFlightDto) {
+        Flight exampleFlight = flightMapper.toEntity(searchFlightDto);
+        return flightRepository
+                .findAll(Example.of(exampleFlight))
+                .stream()
+                .map(flightMapper::toGetFlightDto)
+                .toList();
     }
 }

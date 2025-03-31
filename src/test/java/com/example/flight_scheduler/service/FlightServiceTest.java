@@ -11,6 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Example;
 
 import java.util.List;
 import java.util.Optional;
@@ -142,5 +143,65 @@ class FlightServiceTest {
         assertThrows(
                 FlightNotFoundException.class,
                 () -> flightService.cancelFlight(ID));
+    }
+
+    @Test
+    void searchFlightsEmptyTest() {
+        when(flightMapper.toEntity(buildSearchFlightDto())).thenReturn(buildSearchFlightExample());
+        when(flightRepository.findAll(Example.of(buildSearchFlightExample()))).thenReturn(List.of());
+
+        List<GetFlightDto> getFlightDtoList = flightService.searchFlights(buildSearchFlightDto());
+
+        assertTrue(getFlightDtoList.isEmpty());
+        verify(flightRepository, times(1)).findAll(Example.of(buildSearchFlightExample()));
+    }
+
+    @Test
+    void searchFlightsOneFlightTest() {
+        when(flightMapper.toEntity(buildSearchFlightDto())).thenReturn(buildSearchFlightExample());
+        when(flightMapper.toGetFlightDto(buildFlight(ID))).thenReturn(buildGetFlightDto());
+        when(flightRepository.findAll(Example.of(buildSearchFlightExample()))).thenReturn(List.of(buildFlight(ID)));
+
+        List<GetFlightDto> actualGetFlightDtoList = flightService.searchFlights(buildSearchFlightDto());
+
+        assertEquals(1, actualGetFlightDtoList.size());
+        assertEquals(buildGetFlightDto(), actualGetFlightDtoList.getFirst());
+        verify(flightRepository, times(1)).findAll(Example.of(buildSearchFlightExample()));
+    }
+
+    @Test
+    void searchFlightsMultipleFlightsTest() {
+        when(flightMapper.toEntity(buildSearchFlightDto())).thenReturn(buildSearchFlightExample());
+
+        GetFlightDto getFlightDto1 = buildGetFlightDto();
+        getFlightDto1.setId(1L);
+
+        GetFlightDto getFlightDto2 = buildGetFlightDto();
+        getFlightDto2.setId(2L);
+
+        GetFlightDto getFlightDto3 = buildGetFlightDto();
+        getFlightDto3.setId(3L);
+
+        when(flightMapper.toGetFlightDto(buildFlight(1L))).thenReturn(getFlightDto1);
+        when(flightMapper.toGetFlightDto(buildFlight(2L))).thenReturn(getFlightDto2);
+        when(flightMapper.toGetFlightDto(buildFlight(3L))).thenReturn(getFlightDto3);
+        when(flightRepository.findAll(Example.of(buildSearchFlightExample()))).thenReturn(List.of(buildFlight(1L), buildFlight(2L), buildFlight(3L)));
+
+        List<GetFlightDto> actualGetFlightDtoList = flightService.searchFlights(buildSearchFlightDto());
+
+        assertEquals(3, actualGetFlightDtoList.size());
+
+        GetFlightDto expectedGetFlightDto1 = buildGetFlightDto();
+        expectedGetFlightDto1.setId(1L);
+
+        GetFlightDto expectedGetFlightDto2 = buildGetFlightDto();
+        expectedGetFlightDto2.setId(2L);
+
+        GetFlightDto expectedGetFlightDto3 = buildGetFlightDto();
+        expectedGetFlightDto3.setId(3L);
+
+        assertTrue(actualGetFlightDtoList.containsAll(List.of(expectedGetFlightDto1, expectedGetFlightDto2, expectedGetFlightDto3)));
+
+        verify(flightRepository, times(1)).findAll(Example.of(buildSearchFlightExample()));
     }
 }
