@@ -2,6 +2,7 @@ package com.example.flight_scheduler.controller;
 
 import com.example.flight_scheduler.dto.CreateFlightDto;
 import com.example.flight_scheduler.dto.GetFlightDto;
+import com.example.flight_scheduler.dto.SearchFlightDto;
 import com.example.flight_scheduler.exception.FlightNotFoundException;
 import com.example.flight_scheduler.service.FlightService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -108,5 +109,15 @@ public class FlightController {
         } catch (FlightNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+    }
+
+    @Operation(summary = "Search flights")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved flights")
+    })
+    @PostMapping(path = "/search")
+    ResponseEntity<List<GetFlightDto>> searchFlights(@RequestBody @Valid SearchFlightDto searchFlightDto) {
+        log.info("Received request to search flights");
+        return new ResponseEntity<>(flightService.searchFlights(searchFlightDto), HttpStatus.OK);
     }
 }
