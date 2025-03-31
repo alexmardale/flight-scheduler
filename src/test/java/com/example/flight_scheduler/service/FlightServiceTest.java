@@ -1,6 +1,7 @@
 package com.example.flight_scheduler.service;
 
 import com.example.flight_scheduler.dto.GetFlightDto;
+import com.example.flight_scheduler.exception.FlightNotFoundException;
 import com.example.flight_scheduler.mapper.FlightMapper;
 import com.example.flight_scheduler.repository.FlightRepository;
 import org.junit.jupiter.api.Test;
@@ -9,8 +10,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Optional;
+
 import static com.example.flight_scheduler.utils.FlightUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -38,5 +42,22 @@ class FlightServiceTest {
         assertEquals(buildGetFlightDto(), actualGetFlightDto);
     }
 
+    @Test
+    void getFlightNominalTest() throws FlightNotFoundException {
+        when(flightMapper.toGetFlightDto(buildFlight(ID))).thenReturn(buildGetFlightDto());
+        when(flightRepository.findById(ID)).thenReturn(Optional.of(buildFlight(ID)));
 
+        GetFlightDto actualGetFlightDto = flightService.getFlight(ID);
+
+        assertEquals(buildGetFlightDto(), actualGetFlightDto);
+    }
+
+    @Test
+    void getFlightNotFoundTest() {
+        when(flightRepository.findById(ID)).thenReturn(Optional.empty());
+
+        assertThrows(
+                FlightNotFoundException.class,
+                () -> flightService.getFlight(ID));
+    }
 }

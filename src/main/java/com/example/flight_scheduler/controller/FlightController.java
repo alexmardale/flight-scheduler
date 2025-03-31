@@ -2,8 +2,10 @@ package com.example.flight_scheduler.controller;
 
 import com.example.flight_scheduler.dto.CreateFlightDto;
 import com.example.flight_scheduler.dto.GetFlightDto;
+import com.example.flight_scheduler.exception.FlightNotFoundException;
 import com.example.flight_scheduler.service.FlightService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -14,10 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(path = "/flights")
@@ -47,5 +46,27 @@ public class FlightController {
     ResponseEntity<GetFlightDto> createFlight(@RequestBody @Valid CreateFlightDto createFlightDto) {
         log.info("Received request to create flight: {}", createFlightDto);
         return new ResponseEntity<>(flightService.createFlight(createFlightDto), HttpStatus.OK);
+    }
+
+    @Operation(summary = "Retrieve a flight by id")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Successfully retrieved specified flight",
+                    content = {
+                            @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = GetFlightDto.class))
+                    }),
+            @ApiResponse(responseCode = "404", description = "Flight not found")
+    })
+    @GetMapping(path = "/{id}")
+    ResponseEntity<GetFlightDto> getFlight(@PathVariable @Parameter(name = "id", description = "Id of flight to retrieve") Long id) {
+        log.info("Received request to retrieve flight by id: {}", id);
+        try {
+            return new ResponseEntity<>(flightService.getFlight(id), HttpStatus.OK);
+        } catch (FlightNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 }
