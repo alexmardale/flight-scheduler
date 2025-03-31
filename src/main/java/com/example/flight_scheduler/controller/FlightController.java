@@ -16,7 +16,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -63,7 +69,7 @@ public class FlightController {
             @ApiResponse(responseCode = "404", description = "Flight not found")
     })
     @GetMapping(path = "/{id}")
-    ResponseEntity<GetFlightDto> getFlight(@PathVariable @Parameter(name = "id", description = "Id of flight to retrieve") Long id) {
+    ResponseEntity<GetFlightDto> getFlight(@PathVariable("id") @Parameter(name = "id", description = "Id of flight to retrieve") Long id) {
         log.info("Received request to retrieve flight by id: {}", id);
         try {
             return new ResponseEntity<>(flightService.getFlight(id), HttpStatus.OK);
@@ -80,5 +86,27 @@ public class FlightController {
     ResponseEntity<List<GetFlightDto>> getFlights() {
         log.info("Received request to retrieve flights");
         return new ResponseEntity<>(flightService.getFlights(), HttpStatus.OK);
+    }
+
+    @Operation(summary = "Cancel a flight by id")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Successfully cancelled specified flight",
+                    content = {
+                            @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = GetFlightDto.class))
+                    }),
+            @ApiResponse(responseCode = "404", description = "Flight not found")
+    })
+    @PutMapping(path = "/{id}")
+    ResponseEntity<GetFlightDto> cancelFlight(@PathVariable("id") @Parameter(name = "id", description = "Id of flight to cancel") Long id) {
+        log.info("Received request to cancel flight by id: {}", id);
+        try {
+            return new ResponseEntity<>(flightService.cancelFlight(id), HttpStatus.OK);
+        } catch (FlightNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 }

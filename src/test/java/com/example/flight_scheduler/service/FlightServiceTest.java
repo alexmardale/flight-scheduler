@@ -3,6 +3,8 @@ package com.example.flight_scheduler.service;
 import com.example.flight_scheduler.dto.GetFlightDto;
 import com.example.flight_scheduler.exception.FlightNotFoundException;
 import com.example.flight_scheduler.mapper.FlightMapper;
+import com.example.flight_scheduler.model.Flight;
+import com.example.flight_scheduler.model.FlightStatus;
 import com.example.flight_scheduler.repository.FlightRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -111,5 +113,34 @@ class FlightServiceTest {
         expectedGetFlightDto3.setId(3L);
 
         assertTrue(actualGetFlightDtoList.containsAll(List.of(expectedGetFlightDto1, expectedGetFlightDto2, expectedGetFlightDto3)));
+    }
+
+    @Test
+    void cancelFlightNominalTest() throws FlightNotFoundException {
+        GetFlightDto getFlightDto = buildGetFlightDto();
+        getFlightDto.setFlightStatus(FlightStatus.CANCELLED);
+        Flight flight = buildFlight(ID);
+        flight.setFlightStatus(FlightStatus.CANCELLED);
+        when(flightMapper.toGetFlightDto(flight)).thenReturn(getFlightDto);
+        when(flightRepository.findById(ID)).thenReturn(Optional.of(buildFlight(ID)));
+
+        GetFlightDto actualGetFlightDto = flightService.cancelFlight(ID);
+
+        Flight expectedCancelledFlight = buildFlight(ID);
+        expectedCancelledFlight.setFlightStatus(FlightStatus.CANCELLED);
+        verify(flightRepository, times(1)).save(expectedCancelledFlight);
+
+        GetFlightDto expectedGetFlightDto = buildGetFlightDto();
+        expectedGetFlightDto.setFlightStatus(FlightStatus.CANCELLED);
+        assertEquals(expectedGetFlightDto, actualGetFlightDto);
+    }
+
+    @Test
+    void cancelFlightNotFoundTest() {
+        when(flightRepository.findById(ID)).thenReturn(Optional.empty());
+
+        assertThrows(
+                FlightNotFoundException.class,
+                () -> flightService.cancelFlight(ID));
     }
 }

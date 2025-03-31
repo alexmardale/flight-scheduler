@@ -4,6 +4,7 @@ import com.example.flight_scheduler.dto.CreateFlightDto;
 import com.example.flight_scheduler.dto.GetFlightDto;
 import com.example.flight_scheduler.exception.FlightNotFoundException;
 import com.example.flight_scheduler.model.Flight;
+import com.example.flight_scheduler.model.FlightStatus;
 import com.example.flight_scheduler.repository.FlightRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,6 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 
 import java.util.List;
+import java.util.Optional;
 
 import static com.example.flight_scheduler.utils.FlightUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -111,5 +113,32 @@ class FlightServiceIntegrationTest {
         expectedGetFlightDto3.setId(id3);
 
         assertTrue(actualGetFlightDtoList.containsAll(List.of(expectedGetFlightDto1, expectedGetFlightDto2, expectedGetFlightDto3)));
+    }
+
+    @Test
+    void cancelFlightNominalTest() throws FlightNotFoundException {
+        Flight flight = flightRepository.save(buildFlight(null));
+        Long id = flight.getId();
+
+        GetFlightDto actualGetFlightDto = flightService.cancelFlight(id);
+
+        GetFlightDto expectedGetFlightDto = buildGetFlightDto();
+        expectedGetFlightDto.setId(id);
+        expectedGetFlightDto.setFlightStatus(FlightStatus.CANCELLED);
+
+        assertEquals(expectedGetFlightDto, actualGetFlightDto);
+
+        Flight expectedFlight = buildFlight(id);
+        expectedFlight.setFlightStatus(FlightStatus.CANCELLED);
+        Optional<Flight> flightOptional = flightRepository.findById(id);
+        assertTrue(flightOptional.isPresent());
+        assertEquals(expectedFlight, flightOptional.get());
+    }
+
+    @Test
+    void cancelFlightNotFoundTest() {
+        assertThrows(
+                FlightNotFoundException.class,
+                () -> flightService.cancelFlight(ID));
     }
 }

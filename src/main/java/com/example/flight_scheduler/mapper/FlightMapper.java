@@ -17,7 +17,8 @@ import static org.mapstruct.MappingConstants.ComponentModel.SPRING;
 )
 public interface FlightMapper {
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "flightStatus", expression = "java(com.example.flight_scheduler.model.FlightStatus.SCHEDULED)")
     Flight toEntity(CreateFlightDto createFlightDto);
-    
+
     GetFlightDto toGetFlightDto(Flight flight);
 }

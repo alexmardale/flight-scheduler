@@ -5,6 +5,7 @@ import com.example.flight_scheduler.dto.GetFlightDto;
 import com.example.flight_scheduler.exception.FlightNotFoundException;
 import com.example.flight_scheduler.mapper.FlightMapper;
 import com.example.flight_scheduler.model.Flight;
+import com.example.flight_scheduler.model.FlightStatus;
 import com.example.flight_scheduler.repository.FlightRepository;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -68,5 +69,28 @@ public class FlightService {
      */
     public List<GetFlightDto> getFlights() {
         return flightRepository.findAll().stream().map(flightMapper::toGetFlightDto).toList();
+    }
+
+    /**
+     * Cancel flight specified by id
+     *
+     * @param id the id of the flight to cancel
+     * @return the cancelled flight
+     * @throws FlightNotFoundException if no flight is found by the specified id
+     */
+    public GetFlightDto cancelFlight(Long id) throws FlightNotFoundException {
+        Optional<Flight> flightOptional = flightRepository.findById(id);
+
+        if (flightOptional.isEmpty()) {
+            log.info("Flight not found for id {}", id);
+            throw new FlightNotFoundException();
+        } else {
+            Flight flight = flightOptional.get();
+            flight.setFlightStatus(FlightStatus.CANCELLED);
+            flightRepository.save(flight);
+
+            log.info("Flight with id {} has been cancelled", id);
+            return flightMapper.toGetFlightDto(flight);
+        }
     }
 }

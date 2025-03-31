@@ -3,6 +3,7 @@ package com.example.flight_scheduler.utils;
 import com.example.flight_scheduler.dto.CreateFlightDto;
 import com.example.flight_scheduler.dto.GetFlightDto;
 import com.example.flight_scheduler.model.Flight;
+import com.example.flight_scheduler.model.FlightStatus;
 
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
@@ -34,6 +35,7 @@ public class FlightUtils {
         getFlightDto.setDestination(DESTINATION);
         getFlightDto.setDepartureTime(DEPARTURE_TIME);
         getFlightDto.setArrivalTime(ARRIVAL_TIME);
+        getFlightDto.setFlightStatus(FlightStatus.SCHEDULED);
 
         return getFlightDto;
     }
@@ -46,6 +48,7 @@ public class FlightUtils {
         flight.setDestination(DESTINATION);
         flight.setDepartureTime(DEPARTURE_TIME);
         flight.setArrivalTime(ARRIVAL_TIME);
+        flight.setFlightStatus(FlightStatus.SCHEDULED);
 
         return flight;
     }
