@@ -4,6 +4,7 @@ import com.example.flight_scheduler.configuration.AppConfig;
 import com.example.flight_scheduler.dto.CreateFlightDto;
 import com.example.flight_scheduler.dto.GetFlightDto;
 import com.example.flight_scheduler.exception.FlightNotFoundException;
+import com.example.flight_scheduler.model.FlightStatus;
 import com.example.flight_scheduler.service.FlightService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -23,8 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(FlightController.class)
@@ -130,5 +130,35 @@ class FlightControllerTest {
         expectedGetFlightDto3.setId(3L);
 
         assertTrue(actualGetFlightDtoList.containsAll(List.of(expectedGetFlightDto1, expectedGetFlightDto2, expectedGetFlightDto3)));
+    }
+
+    @Test
+    void cancelFlightNominalTest() throws Exception {
+        GetFlightDto getFlightDto = buildGetFlightDto();
+        getFlightDto.setFlightStatus(FlightStatus.CANCELLED);
+        when(flightService.cancelFlight(ID)).thenReturn(getFlightDto);
+
+        MvcResult mvcResult = mockMvc
+                .perform(
+                        put("/flights/" + ID)
+                                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        GetFlightDto expectedGetFlightDto = buildGetFlightDto();
+        expectedGetFlightDto.setFlightStatus(FlightStatus.CANCELLED);
+        GetFlightDto actualGetFlightDto = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), GetFlightDto.class);
+        assertEquals(expectedGetFlightDto, actualGetFlightDto);
+    }
+
+    @Test
+    void cancelFlightNotFoundTest() throws Exception {
+        when(flightService.cancelFlight(ID)).thenThrow(FlightNotFoundException.class);
+
+        mockMvc
+                .perform(
+                        put("/flights/" + ID)
+                                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
     }
 }

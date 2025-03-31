@@ -2,6 +2,8 @@ package com.example.flight_scheduler.model;
 
 import com.example.flight_scheduler.validation.FlightDateTimeConstraint;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -33,4 +35,7 @@ public class Flight {
 
     @NotNull
     private OffsetDateTime arrivalTime;
+
+    @Enumerated(value = EnumType.STRING)
+    private FlightStatus flightStatus;
 }
