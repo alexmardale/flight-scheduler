@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -58,5 +59,14 @@ public class FlightService {
             log.info("Flight found for id {}", id);
             return flightMapper.toGetFlightDto(flightOptional.get());
         }
+    }
+
+    /**
+     * Retrieve a list of flights
+     *
+     * @return a list of flights
+     */
+    public List<GetFlightDto> getFlights() {
+        return flightRepository.findAll().stream().map(flightMapper::toGetFlightDto).toList();
     }
 }
